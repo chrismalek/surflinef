@@ -1,4 +1,4 @@
-module github.com/mhelmetag/surflinef/v2
+module github.com/chrismalek/surflinef/v2
 
 go 1.15
 
