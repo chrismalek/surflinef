@@ -1,4 +1,4 @@
-module github.com/mhelmetag/surflinef
+module github.com/chrismalek/surflinef
 
 go 1.9
 
