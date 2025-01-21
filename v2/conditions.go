@@ -37,8 +37,10 @@ type Condition struct {
 	Forecaster  Forecaster `json:"forecaster"`
 	Human       bool       `json:"human"`
 	Observation string     `json:"observation"`
-	AM          Report     `json:"am"`
-	PM          Report     `json:"pm"`
+	// AM          Report     `json:"am"`
+	// PM          Report     `json:"pm"`
+	DayToWatch bool   `json:"dayToWatch"`
+	Headline   string `json:"headline"`
 }
 
 // Forecaster is the JSON struct for the forecaster
