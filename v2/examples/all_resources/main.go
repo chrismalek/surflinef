@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/mhelmetag/surflinef/v2"
+	"github.com/chrismalek/surflinef/v2"
 )
 
 func main() {
