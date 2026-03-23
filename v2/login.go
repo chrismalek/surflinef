@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/google/go-querystring/query"
 )
@@ -70,12 +72,25 @@ func (c *Client) PostLogin(lq LoginQuery, lp LoginPayload) (LoginResponse, error
 
 	pr := bytes.NewReader(p)
 
-	r, err := http.Post(u.String(), "application/json", pr)
+	req, err := http.NewRequest("POST", u.String(), pr)
+	if err != nil {
+		return LoginResponse{}, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", c.userAgent())
+	req.Header.Set("Accept", "application/json")
+
+	r, err := c.httpClient().Do(req)
 	if err != nil {
 		return LoginResponse{}, err
 	}
 
 	defer r.Body.Close()
+
+	ct := r.Header.Get("Content-Type")
+	if ct != "" && !strings.Contains(ct, "application/json") {
+		return LoginResponse{}, fmt.Errorf("unexpected content-type %q (status %d) - likely blocked by Cloudflare", ct, r.StatusCode)
+	}
 
 	if r.StatusCode == 200 {
 		var lr LoginResponse

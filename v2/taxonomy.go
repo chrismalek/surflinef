@@ -2,7 +2,9 @@ package surflinef
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/google/go-querystring/query"
 )
@@ -47,6 +49,11 @@ func (c *Client) GetTaxonomy(tq TaxonomyQuery) (Taxonomy, error) {
 	}
 
 	defer r.Body.Close()
+
+	ct := r.Header.Get("Content-Type")
+	if ct != "" && !strings.Contains(ct, "application/json") {
+		return Taxonomy{}, fmt.Errorf("unexpected content-type %q (status %d) - likely blocked by Cloudflare", ct, r.StatusCode)
+	}
 
 	var t Taxonomy
 	err = json.NewDecoder(r.Body).Decode(&t)

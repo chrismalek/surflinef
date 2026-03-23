@@ -20,9 +20,13 @@ const WaveBaseURL = "https://services.surfline.com/kbyg/spots/forecasts/wave"
 
 const LoginBaseURL = "https://services.surfline.com/trusted/token"
 
+const defaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+
 // Client is the SurflineF HTTP Client.
 type Client struct {
-	BaseURL *url.URL
+	BaseURL    *url.URL
+	HttpClient *http.Client // If nil, uses http.DefaultClient
+	UserAgent  string       // If empty, uses a browser-like default
 }
 
 // FullURL formats the query string and Client BaseUrl
@@ -30,9 +34,27 @@ func (c *Client) FullURL(qs string) string {
 	return fmt.Sprintf("%s?%s", c.BaseURL, qs)
 }
 
-// Get is just a wrapper for http.Get
-func (c *Client) Get(u *url.URL) (*http.Response, error) {
-	r, err := http.Get(u.String())
+func (c *Client) httpClient() *http.Client {
+	if c.HttpClient != nil {
+		return c.HttpClient
+	}
+	return http.DefaultClient
+}
 
-	return r, err
+func (c *Client) userAgent() string {
+	if c.UserAgent != "" {
+		return c.UserAgent
+	}
+	return defaultUserAgent
+}
+
+// Get performs an HTTP GET with browser-like headers
+func (c *Client) Get(u *url.URL) (*http.Response, error) {
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", c.userAgent())
+	req.Header.Set("Accept", "application/json")
+	return c.httpClient().Do(req)
 }

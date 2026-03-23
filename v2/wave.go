@@ -2,7 +2,9 @@ package surflinef
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/google/go-querystring/query"
 )
@@ -82,6 +84,11 @@ func (c *Client) GetWave(wq WaveQuery) (WaveResponse, error) {
 	}
 
 	defer r.Body.Close()
+
+	ct := r.Header.Get("Content-Type")
+	if ct != "" && !strings.Contains(ct, "application/json") {
+		return WaveResponse{}, fmt.Errorf("unexpected content-type %q (status %d) - likely blocked by Cloudflare", ct, r.StatusCode)
+	}
 
 	var wr WaveResponse
 	err = json.NewDecoder(r.Body).Decode(&wr)
